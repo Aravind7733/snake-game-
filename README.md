@@ -1,2 +1,2 @@
-# Race with Me
+SNAKE GAME
 in python
