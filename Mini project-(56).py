@@ -1,140 +1,128 @@
-import random
-from time import sleep
-
 import pygame
-
-
-class CarRacing:
-    def __init__(self):
-
-        pygame.init()
-        self.display_width = 800
-        self.display_height = 600
-        self.black = (0, 0, 0)
-        self.white = (255, 255, 255)
-        self.clock = pygame.time.Clock()
-        self.gameDisplay = None
-
-        self.initialize()
-
-    def initialize(self):
-
-        self.crashed = False
-
-        self.carImg = pygame.image.load('.\\img\\car.png')
-        self.car_x_coordinate = (self.display_width * 0.45)
-        self.car_y_coordinate = (self.display_height * 0.8)
-        self.car_width = 49
-
-        # enemy_car
-        self.enemy_car = pygame.image.load('.\\img\\enemy_car_1.png')
-        self.enemy_car_startx = random.randrange(310, 450)
-        self.enemy_car_starty = -600
-        self.enemy_car_speed = 5
-        self.enemy_car_width = 49
-        self.enemy_car_height = 100
-
-        # Background
-        self.bgImg = pygame.image.load(".\\img\\back_ground.jpg")
-        self.bg_x1 = (self.display_width / 2) - (360 / 2)
-        self.bg_x2 = (self.display_width / 2) - (360 / 2)
-        self.bg_y1 = 0
-        self.bg_y2 = -600
-        self.bg_speed = 3
-        self.count = 0
-
-    def car(self, car_x_coordinate, car_y_coordinate):
-        self.gameDisplay.blit(self.carImg, (car_x_coordinate, car_y_coordinate))
-
-    def racing_window(self):
-        self.gameDisplay = pygame.display.set_mode((self.display_width, self.display_height))
-        pygame.display.set_caption('Race with ARAVIND')
-        self.run_car()
-
-    def run_car(self):
-
-        while not self.crashed:
-
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    self.crashed = True
-                # print(event)
-
-                if (event.type == pygame.KEYDOWN):
-                    if (event.key == pygame.K_LEFT):
-                        self.car_x_coordinate -= 50
-                        print ("CAR X COORDINATES: %s" % self.car_x_coordinate)
-                    if (event.key == pygame.K_RIGHT):
-                        self.car_x_coordinate += 50
-                        print ("CAR X COORDINATES: %s" % self.car_x_coordinate)
-                    print ("x: {x}, y: {y}".format(x=self.car_x_coordinate, y=self.car_y_coordinate))
-
-            self.gameDisplay.fill(self.black)
-            self.back_ground_raod()
-
-            self.run_enemy_car(self.enemy_car_startx, self.enemy_car_starty)
-            self.enemy_car_starty += self.enemy_car_speed
-
-            if self.enemy_car_starty > self.display_height:
-                self.enemy_car_starty = 0 - self.enemy_car_height
-                self.enemy_car_startx = random.randrange(310, 450)
-
-            self.car(self.car_x_coordinate, self.car_y_coordinate)
-            self.highscore(self.count)
-            self.count += 1
-            if (self.count % 100 == 0):
-                self.enemy_car_speed += 1
-                self.bg_speed += 1
-            if self.car_y_coordinate < self.enemy_car_starty + self.enemy_car_height:
-                if self.car_x_coordinate > self.enemy_car_startx and self.car_x_coordinate < self.enemy_car_startx + self.enemy_car_width or self.car_x_coordinate + self.car_width > self.enemy_car_startx and self.car_x_coordinate + self.car_width < self.enemy_car_startx + self.enemy_car_width:
-                    self.crashed = True
-                    self.display_message("Never Give Up!!!")
-
-            if self.car_x_coordinate < 310 or self.car_x_coordinate > 460:
-                self.crashed = True
-                self.display_message("Never Give Up!!!")
-
+import time
+import random
+ 
+pygame.init()
+ 
+white = (255, 255, 255)
+yellow = (255, 255, 102)
+black = (0, 0, 0)
+red = (213, 50, 80)
+green = (0, 255, 0)
+blue = (50, 153, 213)
+ 
+dis_width = 600
+dis_height = 400
+ 
+dis = pygame.display.set_mode((dis_width, dis_height))
+pygame.display.set_caption('Snake Game by ARAVIND')
+ 
+clock = pygame.time.Clock()
+ 
+snake_block = 10
+snake_speed = 15
+ 
+font_style = pygame.font.SysFont("bahnschrift", 25)
+score_font = pygame.font.SysFont("comicsansms", 35)
+ 
+ 
+def Your_score(score):
+    value = score_font.render("Your Score: " + str(score), True, yellow)
+    dis.blit(value, [0, 0])
+ 
+ 
+ 
+def our_snake(snake_block, snake_list):
+    for x in snake_list:
+        pygame.draw.rect(dis, black, [x[0], x[1], snake_block, snake_block])
+ 
+ 
+def message(msg, color):
+    mesg = font_style.render(msg, True, color)
+    dis.blit(mesg, [dis_width / 6, dis_height / 3])
+ 
+ 
+def gameLoop():
+    game_over = False
+    game_close = False
+ 
+    x1 = dis_width / 2
+    y1 = dis_height / 2
+ 
+    x1_change = 0
+    y1_change = 0
+ 
+    snake_List = []
+    Length_of_snake = 1
+ 
+    foodx = round(random.randrange(0, dis_width - snake_block) / 10.0) * 10.0
+    foody = round(random.randrange(0, dis_height - snake_block) / 10.0) * 10.0
+ 
+    while not game_over:
+ 
+        while game_close == True:
+            dis.fill(blue)
+            message("You Lost! Press C-Play Again or Q-Quit", red)
+            Your_score(Length_of_snake - 1)
             pygame.display.update()
-            self.clock.tick(60)
-
-    def display_message(self, msg):
-        font = pygame.font.SysFont("comicsansms", 72, True)
-        text = font.render(msg, True, (255, 255, 255))
-        self.gameDisplay.blit(text, (400 - text.get_width() // 2, 240 - text.get_height() // 2))
-        self.display_credit()
+ 
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_q:
+                        game_over = True
+                        game_close = False
+                    if event.key == pygame.K_c:
+                        gameLoop()
+ 
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                game_over = True
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_LEFT:
+                    x1_change = -snake_block
+                    y1_change = 0
+                elif event.key == pygame.K_RIGHT:
+                    x1_change = snake_block
+                    y1_change = 0
+                elif event.key == pygame.K_UP:
+                    y1_change = -snake_block
+                    x1_change = 0
+                elif event.key == pygame.K_DOWN:
+                    y1_change = snake_block
+                    x1_change = 0
+ 
+        if x1 >= dis_width or x1 < 0 or y1 >= dis_height or y1 < 0:
+            game_close = True
+        x1 += x1_change
+        y1 += y1_change
+        dis.fill(blue)
+        pygame.draw.rect(dis, green, [foodx, foody, snake_block, snake_block])
+        snake_Head = []
+        snake_Head.append(x1)
+        snake_Head.append(y1)
+        snake_List.append(snake_Head)
+        if len(snake_List) > Length_of_snake:
+            del snake_List[0]
+ 
+        for x in snake_List[:-1]:
+            if x == snake_Head:
+                game_close = True
+ 
+        our_snake(snake_block, snake_List)
+        Your_score(Length_of_snake - 1)
+ 
         pygame.display.update()
-        self.clock.tick(60)
-        sleep(1)
-        car_racing.initialize()
-        car_racing.racing_window()
+ 
+        if x1 == foodx and y1 == foody:
+            foodx = round(random.randrange(0, dis_width - snake_block) / 10.0) * 10.0
+            foody = round(random.randrange(0, dis_height - snake_block) / 10.0) * 10.0
+            Length_of_snake += 1
+ 
+        clock.tick(snake_speed)
+ 
+    pygame.quit()
+    quit()
+ 
+ 
+gameLoop()
 
-    def back_ground_raod(self):
-        self.gameDisplay.blit(self.bgImg, (self.bg_x1, self.bg_y1))
-        self.gameDisplay.blit(self.bgImg, (self.bg_x2, self.bg_y2))
-
-        self.bg_y1 += self.bg_speed
-        self.bg_y2 += self.bg_speed
-
-        if self.bg_y1 >= self.display_height:
-            self.bg_y1 = -600
-
-        if self.bg_y2 >= self.display_height:
-            self.bg_y2 = -600
-
-    def run_enemy_car(self, thingx, thingy):
-        self.gameDisplay.blit(self.enemy_car, (thingx, thingy))
-
-    def highscore(self, count):
-        font = pygame.font.SysFont("arial", 20)
-        text = font.render("Score : " + str(count), True, self.white)
-        self.gameDisplay.blit(text, (0, 0))
-
-    def display_credit(self):
-        font = pygame.font.SysFont("lucidaconsole", 14)
-        text = font.render("With love Aravind!", True, self.white)
-        self.gameDisplay.blit(text, (600, 520))
-
-
-if __name__ == '__main__':
-    car_racing = CarRacing()
-    car_racing.racing_window()
