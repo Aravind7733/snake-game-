@@ -1,2 +1,2 @@
-# snake-game-
+# Race with Me
 in python
